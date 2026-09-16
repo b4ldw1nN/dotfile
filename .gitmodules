@@ -1,3 +1,6 @@
 [submodule "hyprshell"]
 	path = hyprshell
 	url = /home/zoro/hyprshell
+[submodule "home/.config/hypr"]
+	path = home/.config/hypr
+	url = ./home/.config/hypr

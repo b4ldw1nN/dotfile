@@ -1,0 +1,3 @@
+[submodule "hyprshell"]
+	path = hyprshell
+	url = /home/zoro/hyprshell

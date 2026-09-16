@@ -1,0 +1,1177 @@
+/* ==========================================================================
+   HYPRSHELL CUSTOM CSS THEME & CLASS REFERENCE CHEAT SHEET
+   ==========================================================================
+   Edit this file to customize any aspect of your shell! Changes hot-reload
+   live in real-time within 500ms of saving this file without restarting.
+
+   🎨 Dynamic Palette Variables:
+      @surface_color      - Primary dark surface/panel background (#18181b)
+      @bg_color           - Outer background color (#121214)
+      @fg_color           - Default text foreground color (#e2e8f0)
+      @accent_color       - Accent highlight color (#94a3b8)
+      @hover_color        - Hover background state (#242429)
+      @module_bg          - Module container background (#1e1e24)
+
+   🏷️ Core Shell Selectors & Component Classes:
+      .bar-container      - Top Dynamic Island capsule container
+      .bar-has-panel      - Bar container state when a popup panel is open
+      .panel-content      - Floating attached popup panel card
+      .bar-left-box       - Left section of bar (workspaces & launcher)
+      .bar-right-box      - Right section of bar (tray icons & power)
+      .bar-launcher-btn   - Launcher / Control center icon buttons
+      .bar-dash-btn       - Center clock / dashboard pill button
+      .bar-systray-box    - Status tray icon container
+
+   📦 Module & Popup Panels:
+      .wifi-popup         - WiFi manager popup panel
+      .wifi-network-item  - Individual WiFi network row
+      .volume-popup       - Volume & Microphone audio slider popup
+      .notification-card  - Individual notification card
+      .dashboard-window   - Full Dashboard window
+      .control-center-window - Control Center grid popup
+      .lockscreen-window  - Lockscreen overlay window
+      .power-window       - Power menu popup
+
+   🎛️ GTK Standard Widget Selectors:
+      button, label, scale, slider, trough, highlight, switch, entry, listbox
+
+   💡 Live Inspector Tip:
+      Run `GTK_DEBUG=interactive hyprshell` in a terminal to inspect any element!
+   ========================================================================== */
+
+
+
+* {
+    box-shadow: none;
+    text-shadow: none;
+}
+
+window, window.background, window.csd, tooltip, scrolledwindow, viewport, list, listbox, row, revealer {
+    background: transparent;
+    background-color: transparent;
+    color: @fg_color;
+    font-family: "JetBrainsMono Nerd Font", "FiraCode Nerd Font", sans-serif;
+    font-size: 14px;
+    border: none;
+}
+
+/* Base Buttons */
+button {
+    background: transparent;
+    color: @fg_color;
+    border-radius: 8px;
+    padding: 4px 10px;
+    border: none;
+    font-weight: bold;
+    font-size: 15px;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+button:hover {
+    background: @hover_color;
+    color: @accent_color;
+    box-shadow: none;
+    transform: translateY(-1px);
+}
+button:active {
+    transform: translateY(0px) scale(0.97);
+}
+
+/* Bar + Popup = One Seamless Card */
+.bar-outer {
+    background: transparent;
+    border-radius: 18px;
+}
+
+/* Unified Dynamic Island Capsule */
+.bar-container {
+    background: @surface_color;
+    background-color: @surface_color;
+    padding: 3px 14px;
+    border: 1px solid alpha(#ffffff, 0.10);
+    border-radius: 9999px;
+    box-shadow: none;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: bar-drop-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+
+/* Connected Popup Panel Card attached seamlessly underneath the island */
+.panel-content {
+    background: @surface_color;
+    background-color: @surface_color;
+    border: 1px solid alpha(#ffffff, 0.10);
+    border-radius: 20px;
+    box-shadow: none;
+    padding: 16px;
+    margin-top: 6px;
+    margin-bottom: 14px;
+    animation: panel-flush-unfold 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.panel-content.panel-right {
+    margin-right: 12px;
+}
+
+.panel-content.panel-left {
+    margin-left: 12px;
+}
+
+@keyframes panel-flush-unfold {
+    0% {
+        opacity: 0;
+        transform: translateY(-4px) scaleY(0.97);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0px) scaleY(1.0);
+    }
+}
+
+/* Inner elements share the island container */
+.bar-launcher-btn {
+    color: @accent_color;
+    font-size: 16px;
+    border-radius: 9999px;
+    padding: 4px 10px;
+    min-height: 0;
+    background: transparent;
+    border: none;
+}
+.bar-launcher-btn:hover {
+    background: alpha(@accent_color, 0.2);
+    color: @accent_color;
+}
+
+.bar-clock-media-box {
+    background: transparent;
+    padding: 0px 8px;
+}
+
+.module-clock {
+    font-weight: 700;
+    color: @fg_color;
+}
+
+.module-media {
+    color: @fg_color;
+    font-size: 13px;
+    font-weight: 600;
+}
+.media-icon {
+    color: @accent_color;
+    margin-right: 4px;
+}
+
+/* Material You (M3) Active Workspace Pill */
+.module-workspaces {
+    background: transparent;
+    padding: 0px 4px;
+    border: none;
+}
+
+.workspace-active, .workspace-inactive {
+    min-width: 28px;
+    min-height: 22px;
+    border-radius: 9999px;
+    margin: 0 4px;
+    padding: 0 6px;
+    font-size: 12px;
+    font-weight: 700;
+    transition: all 0.3s cubic-bezier(0.2, 0.0, 0.0, 1.0);
+}
+
+.workspace-active {
+    background: @accent_color;
+    color: @bg_color;
+    box-shadow: 0 2px 8px alpha(@accent_color, 0.35);
+}
+
+.workspace-inactive {
+    color: alpha(@fg_color, 0.55);
+    background: alpha(@surface_color, 0.4);
+}
+
+.workspace-inactive:hover {
+    background-color: alpha(@accent_color, 0.20);
+    color: @accent_color;
+}
+
+/* M3 Pill Buttons */
+.bar-dash-btn {
+    font-size: 14px;
+    font-weight: 700;
+    background: alpha(@surface_color, 0.6);
+    border-radius: 9999px;
+    padding: 4px 14px;
+    min-height: 0;
+    border: 1px solid alpha(#ffffff, 0.08);
+    color: @fg_color;
+    transition: all 0.25s cubic-bezier(0.2, 0.0, 0.0, 1.0);
+}
+
+.bar-dash-btn:hover {
+    background: alpha(@accent_color, 0.25);
+    color: @accent_color;
+    border-color: alpha(@accent_color, 0.4);
+}
+
+/* Popups and Overlays */
+.popup-window,
+.volume-popup,
+.wifi-popup,
+.dashboard-container,
+.control-center-popup {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0px;
+    margin: 0px;
+}
+
+.power-overlay {
+    background-color: rgba(0, 0, 0, 0.75);
+}
+
+.power-btn {
+    font-size: 28px;
+    padding: 35px;
+    border-radius: 8px;
+    background-color: @module_bg;
+    min-width: 150px;
+    margin: 15px;
+    transition: all 0.2s ease-in-out;
+}
+.power-btn:hover {
+    background-color: @accent_color;
+    color: @bg_color;
+    transform: scale(1.05);
+    box-shadow: none;
+}
+
+.launcher-window {
+    background: linear-gradient(135deg, alpha(@surface_color, 0.95), alpha(@bg_color, 0.95));
+    border-radius: 8px;
+    padding: 15px;
+    border: 1px solid alpha(#ffffff, 0.1);
+    box-shadow: none;
+    animation: window-pop-in 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.1) forwards;
+}
+.launcher-window row {
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+}
+.launcher-window row:hover {
+    background-color: alpha(@fg_color, 0.05);
+}
+.launcher-window row:selected {
+    background-color: alpha(@accent_color, 0.15);
+}
+.clipboard-delete-btn {
+    background: none;
+    border: none;
+    padding: 4px;
+    border-radius: 6px;
+    color: alpha(@fg_color, 0.6);
+}
+.clipboard-delete-btn:hover {
+    background-color: alpha(@accent_color, 0.2);
+    color: @accent_color;
+}
+
+.app-exec {
+    font-size: 0px;
+}
+
+.dashboard-container {
+    background: transparent;
+    border: none;
+    padding: 4px;
+    box-shadow: none;
+}
+
+.dashboard-card {
+    background-color: @module_bg;
+    border-radius: 18px;
+    padding: 12px;
+    border: 1px solid alpha(#ffffff, 0.1);
+    transition: background-color 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
+                transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: none;
+}
+.dashboard-card:hover {
+    background-color: alpha(@accent_color, 0.15);
+    box-shadow: none;
+    transform: translateY(-2px);
+}
+
+.dashboard-small-card {
+    padding: 15px 10px;
+}
+.dashboard-small-card.active {
+    background-color: @accent_color;
+    color: @bg_color;
+}
+.dashboard-small-icon {
+    font-size: 30px;
+    margin-bottom: 8px;
+}
+.dashboard-small-text {
+    font-size: 14px;
+    font-weight: bold;
+}
+.dashboard-small-card.active label {
+    color: @bg_color;
+}
+
+.dashboard-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: @fg_color;
+}
+
+.dashboard-subtitle {
+    font-size: 13px;
+    color: alpha(@fg_color, 0.6);
+}
+
+.dashboard-greeting {
+    font-size: 16px;
+    font-weight: 700;
+    color: @fg_color;
+    margin-bottom: 2px;
+}
+
+.dashboard-quote {
+    font-size: 13px;
+    font-weight: 400;
+    font-style: italic;
+    color: alpha(@fg_color, 0.7);
+}
+
+.dashboard-avatar {
+    border-radius: 9999px;
+    min-width: 140px;
+    min-height: 140px;
+}
+
+.dashboard-avatar picture, .dashboard-avatar image {
+    border-radius: 9999px;
+}
+
+.dashboard-shortcut-btn {
+    background-color: @surface_color;
+    color: @accent_color;
+    border-radius: 14px;
+    padding: 14px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border: 1px solid alpha(#ffffff, 0.05);
+}
+
+.dashboard-icon-btn {
+    background-color: alpha(@fg_color, 0.05);
+    color: @fg_color;
+    border-radius: 16px;
+    padding: 14px 14px;
+    font-size: 20px;
+    border: none;
+}
+.dashboard-icon-btn:hover {
+    background-color: @hover_color;
+    color: @accent_color;
+}
+.dashboard-icon-btn.active {
+    background-color: @accent_color;
+    color: @bg_color;
+    box-shadow: none;
+}
+
+.dashboard-slider-icon {
+    font-size: 22px;
+    color: @fg_color;
+}
+
+.dashboard-levelbar {
+    min-height: 10px;
+    border-radius: 5px;
+    background-color: alpha(@fg_color, 0.1);
+}
+.dashboard-levelbar block {
+    background-color: @accent_color;
+    border-radius: 5px;
+}
+
+.dashboard-sysmon-label {
+    font-size: 13px;
+    font-weight: 800;
+    color: @fg_color;
+}
+
+.dashboard-calendar {
+    background: transparent;
+    color: @fg_color;
+    border: none;
+    font-size: 14px;
+}
+.dashboard-calendar:selected {
+    background-color: @accent_color;
+    color: @bg_color;
+    border-radius: 8px;
+}
+
+.settings-container {
+    background-color: alpha(@surface_color, 0.95);
+    border-radius: 16px;
+    box-shadow: none;
+    border: 1px solid alpha(#ffffff, 0.1);
+}
+.settings-sidebar {
+    background-color: alpha(@bg_color, 0.95);
+    border-right: 1px solid @hover_color;
+    padding: 10px;
+}
+.settings-page-title {
+    font-size: 26px;
+    font-weight: 900;
+    color: @accent_color;
+    margin-bottom: 24px;
+    border-bottom: 2px solid @hover_color;
+    padding-bottom: 12px;
+}
+.settings-save-btn {
+    background-color: @accent_color;
+    color: @bg_color;
+    font-weight: bold;
+    border-radius: 10px;
+    padding: 10px;
+    transition: all 0.2s;
+}
+.settings-save-btn:hover {
+    background-color: @hover_color;
+    color: @accent_color;
+}
+
+.power-bg-btn {
+    background-color: alpha(@bg_color, 0.85);
+    border: none;
+    box-shadow: none;
+}
+.power-bg-btn:hover, .power-bg-btn:active {
+    background-color: alpha(@bg_color, 0.85);
+}
+
+.lockscreen-bg {
+    background: linear-gradient(135deg, alpha(@bg_color, 0.95), alpha(#000000, 0.95));
+}
+
+.lockscreen-avatar {
+    border-radius: 50%;
+    margin-bottom: 24px;
+    border: 3px solid @accent_color;
+    box-shadow: none;
+}
+
+.lockscreen-name {
+    font-size: 28px;
+    font-weight: 900;
+    margin-bottom: 35px;
+    color: @fg_color;
+}
+
+.lockscreen-entry-container {
+    background-color: @module_bg;
+    border-radius: 16px;
+    padding: 12px 24px;
+    border: 2px solid @hover_color;
+    box-shadow: none;
+}
+
+.lockscreen-entry {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    color: @fg_color;
+    font-size: 20px;
+    font-weight: bold;
+}
+.lockscreen-entry:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.lockscreen-icon {
+    font-size: 26px;
+    color: @accent_color;
+}
+
+.lockscreen-feedback {
+    font-size: 15px;
+    font-weight: bold;
+    color: @accent_color;
+    margin-top: 12px;
+}
+
+.lockscreen-bottom-box {
+    margin-bottom: 60px;
+}
+
+.lockscreen-clock {
+    font-size: 56px;
+    font-weight: 900;
+    color: @accent_color;
+    text-shadow: none;
+}
+
+.lockscreen-power-btn {
+    background-color: @module_bg;
+    color: @fg_color;
+    border-radius: 50%;
+    padding: 18px;
+    font-size: 26px;
+    transition: all 0.2s;
+}
+.lockscreen-power-btn:hover {
+    background-color: @accent_color;
+    color: @bg_color;
+    transform: scale(1.1);
+    box-shadow: none;
+}
+
+.osd-window {
+    background: transparent;
+}
+.osd-container {
+    background: @surface_color;
+    border-radius: 100px;
+    padding: 15px 25px;
+    box-shadow: none;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    opacity: 0;
+    transition: opacity 200ms cubic-bezier(0.25, 1, 0.35, 1.05);
+}
+.osd-container.osd-visible {
+    opacity: 1;
+}
+.osd-icon {
+    font-size: 24px;
+    color: @accent_color;
+    margin-right: 15px;
+}
+.osd-progress {
+    min-height: 8px;
+    border-radius: 10px;
+}
+.osd-progress trough {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    min-height: 8px;
+}
+.osd-progress progress {
+    background-color: @accent_color;
+    border-radius: 100px;
+    min-height: 8px;
+}
+.osd-value {
+    font-size: 16px;
+    font-weight: bold;
+    color: @fg_color;
+    margin-left: 15px;
+    min-width: 42px;
+}
+
+.dashboard-media-card {
+    padding: 20px;
+}
+.dashboard-media-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: @fg_color;
+}
+.dashboard-media-artist {
+    font-size: 14px;
+    color: alpha(@fg_color, 0.7);
+    margin-bottom: 10px;
+}
+.dashboard-media-btn {
+    background: transparent;
+    color: @fg_color;
+    font-size: 24px;
+    padding: 10px;
+    border-radius: 50%;
+}
+.dashboard-media-btn:hover {
+    background-color: alpha(@fg_color, 0.1);
+}
+.dashboard-media-play-btn {
+    font-size: 30px;
+    color: @accent_color;
+}
+.dashboard-media-play-btn:hover {
+    background-color: alpha(@accent_color, 0.2);
+}
+
+.weather-card {
+    background: alpha(@surface_color, 0.95); border: 1px solid alpha(#ffffff, 0.05);
+    box-shadow: none;
+}
+.weather-card label {
+    color: white;
+}
+.weather-loc {
+    font-size: 16px;
+    font-weight: 700;
+    opacity: 0.9;
+    text-shadow: none;
+}
+.weather-desc-small {
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0.8;
+    text-shadow: none;
+}
+.weather-temp-huge {
+    font-size: 52px;
+    font-weight: 900;
+    text-shadow: none;
+}
+.weather-icon-huge {
+    font-size: 56px;
+    text-shadow: none;
+}
+.weather-detail {
+    font-size: 13px;
+    font-weight: 600;
+    color: white;
+    background-color: rgba(255, 255, 255, 0.15);
+    padding: 6px 12px;
+    border-radius: 12px;
+}
+
+.calendar-header-card {
+    background: alpha(@surface_color, 0.95); border: 1px solid alpha(#ffffff, 0.05);
+    box-shadow: none;
+    padding: 12px;
+}
+.calendar-time {
+    font-size: 36px;
+    font-weight: 900;
+    color: white;
+    text-shadow: none;
+}
+.calendar-date {
+    font-size: 16px;
+    font-weight: 600;
+    color: white;
+    opacity: 0.95;
+    text-shadow: none;
+}
+calendar {
+    padding: 10px;
+}
+calendar header {
+    padding: 8px;
+    font-weight: bold;
+    font-size: 16px;
+    color: @accent_color;
+}
+calendar button {
+    border-radius: 12px;
+}
+calendar grid {
+    padding: 5px;
+}
+calendar day {
+    border-radius: 8px;
+    padding: 4px;
+}
+calendar day:selected {
+    background-color: @accent_color;
+    color: @bg_color;
+    font-weight: bold;
+}
+calendar day:hover {
+    background-color: alpha(@fg_color, 0.1);
+}
+
+.weather-forecast-card {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 10px;
+    min-width: 90px;
+}
+.weather-f-day {
+    font-size: 13px;
+    font-weight: 600;
+    color: white;
+    opacity: 0.9;
+}
+.weather-f-icon {
+    font-size: 28px;
+    text-shadow: none;
+    margin: 5px 0;
+}
+.weather-f-temp {
+    font-size: 13px;
+    font-weight: 700;
+    color: white;
+}
+
+.music-player-card {
+    background: linear-gradient(135deg, rgba(40,40,40,0.8) 0%, rgba(20,20,20,0.9) 100%);
+    box-shadow: none;
+    border-radius: 20px;
+    padding: 16px;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.music-art {
+    border-radius: 16px;
+    box-shadow: none;
+}
+
+.music-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: white;
+    text-shadow: none;
+}
+
+.music-artist {
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.music-play-btn {
+    font-size: 20px;
+    background-color: @accent_color;
+    color: @bg_color;
+    border-radius: 50%;
+    min-width: 44px;
+    min-height: 44px;
+    box-shadow: none;
+}
+.music-play-btn:hover {
+    background-color: alpha(@accent_color, 0.8);
+}
+
+.music-progress {
+    margin-top: 10px;
+}
+.music-progress trough {
+    min-height: 6px;
+    border-radius: 3px;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+.music-progress highlight {
+    background-color: @accent_color;
+    border-radius: 3px;
+}
+.music-progress slider {
+    min-width: 12px;
+    min-height: 12px;
+    border-radius: 50%;
+    background-color: white;
+    box-shadow: none;
+}
+
+.sysmon-cpu-val, .sysmon-ram-val {
+    font-size: 13px;
+    font-weight: bold;
+    margin-left: 10px;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 4px 10px;
+    border-radius: 8px;
+}
+.sysmon-chart {
+    border-radius: 12px;
+    box-shadow: none;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.cc-tile-btn {
+    background-color: alpha(@fg_color, 0.05);
+    border-radius: 20px;
+    padding: 10px 14px;
+    border: none;
+    box-shadow: none;
+}
+.cc-tile-btn:hover {
+    background-color: @hover_color;
+}
+.cc-tile-btn.active {
+    background-color: @accent_color;
+    color: @bg_color;
+    box-shadow: none;
+}
+.cc-tile-btn.active .cc-tile-icon,
+.cc-tile-btn.active .cc-tile-title,
+.cc-tile-btn.active .cc-tile-sub {
+    color: @bg_color;
+}
+.cc-tile-icon {
+    font-size: 24px;
+    color: @accent_color;
+    margin-right: 4px;
+}
+.cc-tile-title {
+    font-weight: 800;
+    font-size: 14px;
+}
+.cc-tile-sub {
+    font-weight: 500;
+    font-size: 11px;
+    opacity: 0.7;
+}
+
+.cc-battery-prog trough {
+    min-height: 6px;
+    border-radius: 3px;
+    background-color: alpha(@fg_color, 0.15);
+}
+.cc-battery-prog progress {
+    min-height: 6px;
+    border-radius: 3px;
+    background-color: @accent_color;
+    box-shadow: none;
+}
+
+/* Hide all scrollbars; content still scrolls via wheel/touch/drag. */
+scrollbar {
+    background: transparent;
+    border: none;
+}
+scrollbar.horizontal,
+scrollbar.vertical,
+scrollbar slider,
+scrollbar contents {
+    background: transparent;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    opacity: 0;
+    border: none;
+    box-shadow: none;
+}
+
+/* Neutralize Breeze-Dark's negative slider margins (GtkGizmo min-size warnings
+   and the continuous layout loop that balloons RSS). Zero margin/padding on
+   ALL slider gizmos so min sizes stay >= 0; hide the scrollbar separately. */
+scale slider,
+switch slider,
+scrollbar slider {
+    margin: 0;
+    padding: 0;
+}
+scale slider,
+switch slider {
+    min-width: 18px;
+    min-height: 18px;
+}
+
+/* Elegant Control Center Sliders */
+scale.cc-slider trough {
+    min-height: 6px;
+    border-radius: 3px;
+    background-color: alpha(@fg_color, 0.15);
+}
+scale.cc-slider highlight {
+    min-height: 6px;
+    border-radius: 3px;
+    background-color: @accent_color;
+    box-shadow: none;
+}
+scale.cc-slider slider {
+    min-width: 18px;
+    min-height: 18px;
+    border-radius: 50%;
+    background-color: white;
+    box-shadow: none;
+    border: 1px solid alpha(#000000, 0.1);
+}
+
+.volume-popup {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    min-width: 320px;
+    padding: 4px;
+}
+
+/* Network Card */
+.network-icon {
+    font-size: 32px;
+    color: @accent_color;
+}
+.network-lbl-down {
+    color: @fg_color; /* Green */
+    font-weight: bold;
+}
+.network-lbl-up {
+    color: @accent_color; /* Red */
+    font-weight: bold;
+}
+
+/* Todo Card */
+.todo-list {
+    background: transparent;
+    border-radius: 8px;
+}
+.todo-done {
+    text-decoration: line-through;
+    opacity: 0.5;
+}
+.todo-add-btn, .todo-del-btn {
+    background-color: alpha(@fg_color, 0.1);
+    border-radius: 8px;
+    padding: 6px 10px;
+    color: @accent_color;
+    transition: all 0.2s;
+}
+.todo-add-btn:hover, .todo-del-btn:hover {
+    background-color: @accent_color;
+    color: @bg_color;
+}
+.todo-del-btn {
+    color: @accent_color;
+}
+.todo-del-btn:hover {
+    background-color: @accent_color;
+}
+
+/* Music Visualizer */
+.music-vis {
+    border-radius: 8px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+/* Dynamic Island */
+.dynamic-island {
+    background: alpha(#000000, 0.9);
+    border-radius: 40px;
+    padding: 5px;
+    box-shadow: none;
+    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.island-expanded {
+    padding: 10px 15px;
+    border-radius: 30px;
+}
+.island-art {
+    border-radius: 50%;
+    margin-right: 15px;
+}
+.island-title {
+    font-weight: bold;
+    font-size: 14px;
+    color: #ffffff;
+}
+.island-artist {
+    font-size: 12px;
+    color: #aaaaaa;
+}
+.island-waveform {
+    font-size: 14px;
+    color: @accent_color;
+    margin-left: 15px;
+    margin-right: 5px;
+}
+
+/* Spinning Album Art for Dynamic Island */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.island-art {
+    border-radius: 50%; /* Make it perfectly circular like a vinyl */
+    animation: spin 5s linear infinite;
+    margin-right: 10px;
+    box-shadow: none;
+}
+
+.island-title {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.island-artist {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+/* ANIMATIONS */
+@keyframes window-pop-in {
+    0% {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes bar-drop-in {
+    0% {
+        opacity: 0;
+        transform: translateY(-40px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fade-slide-down {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes dock-slide-up {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dock-container {
+    background: alpha(@bg_color, 0.85);
+    border-radius: 24px;
+    padding: 10px 15px;
+    border: 1px solid alpha(#ffffff, 0.1);
+    box-shadow: none;
+    animation: dock-slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.dock-item {
+    border-radius: 16px;
+    padding: 8px;
+    margin: 0 5px;
+    background: transparent;
+    transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.dock-item:hover {
+    background: alpha(@fg_color, 0.1);
+    transform: scale(1.25) translateY(-5px);
+}
+
+@keyframes widget-fade-in {
+    0% {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.desktop-widget {
+    padding: 20px;
+    animation: widget-fade-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.desktop-time {
+    font-size: 120px;
+    color: alpha(@fg_color, 0.9);
+    letter-spacing: -2px;
+}
+
+.desktop-date {
+    font-size: 32px;
+    color: @accent_color;
+    margin-top: -20px;
+}
+
+/* Settings UI Modern Styling */
+.settings-container {
+    background: linear-gradient(135deg, alpha(@surface_color, 0.96), alpha(@bg_color, 0.94));
+    border-radius: 20px;
+    border: 1px solid alpha(#ffffff, 0.12);
+    box-shadow: none;
+    padding: 12px;
+}
+
+.settings-sidebar {
+    background: alpha(@bg_color, 0.4);
+    border-radius: 16px;
+    padding: 10px;
+    margin-right: 12px;
+    border: 1px solid alpha(#ffffff, 0.05);
+}
+
+.settings-sidebar row {
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-weight: 600;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.settings-sidebar row:hover {
+    background: alpha(@accent_color, 0.15);
+    color: @accent_color;
+}
+
+.settings-sidebar row:selected {
+    background: @accent_color;
+    color: @bg_color;
+    box-shadow: none;
+}
+
+/* WiFi Popup Modern Styling */
+.wifi-popup {
+    min-width: 340px;
+    background: transparent;
+    border: none;
+    padding: 4px;
+    box-shadow: none;
+}
+
+.wifi-network-item {
+    border-radius: 12px;
+    padding: 8px 12px;
+    background: alpha(@surface_color, 0.6);
+    border: 1px solid alpha(#ffffff, 0.05);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.wifi-network-item:hover {
+    background: alpha(@hover_color, 0.8);
+    border-color: alpha(@accent_color, 0.4);
+    transform: translateX(2px);
+}
+
+entry {
+    background: alpha(@surface_color, 0.8);
+    border: 1px solid alpha(#ffffff, 0.1);
+    border-radius: 10px;
+    padding: 8px 12px;
+    color: @fg_color;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+entry:focus {
+    border-color: @accent_color;
+    box-shadow: none;
+}
+
+
+

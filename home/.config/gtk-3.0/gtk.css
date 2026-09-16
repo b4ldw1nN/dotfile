@@ -1,0 +1,38 @@
+/*
+* Wallust GTK Colors - Frosted v3 (No Errors)
+*/
+
+@define-color accent_color #718285;
+@define-color accent_fg_color #060A11;
+@define-color accent_bg_color #718285;
+@define-color window_bg_color #060A11;
+@define-color window_fg_color #ADB1BA;
+@define-color view_bg_color #060A11;
+@define-color view_fg_color #ADB1BA;
+
+/* --- THUNAR TRANSPARENCY --- */
+
+.thunar .sidebar,
+.thunar .sidebar .view,
+.thunar .sidebar treeview,
+.thunar .shortcuts-view,
+.thunar .shortcuts-pane,
+.thunar scrolledwindow.sidebar,
+.thunar treeview.view {
+    background-color: rgba(0,0,0,0);
+    background-image: none;
+    border-style: none;
+}
+
+/* Rounding */
+window.ssd,
+window.csd,
+window.background,
+.thunar-window {
+    border-radius: 20px;
+}
+
+/* Remove Borders */
+.thunar scrolledwindow {
+    border-width: 0;
+}

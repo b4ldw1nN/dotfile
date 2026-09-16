@@ -1,0 +1,69 @@
+{
+  "general": {
+    "avatar_path": "~/.face",
+    "theme": "dark",
+    "use_fahrenheit": false
+  },
+  "shell": {
+    "ui_scale": 1.0,
+    "font_family": "Adwaita Mono",
+    "time_format": "%H:%M",
+    "date_format": "%A, %x",
+    "offline_mode": false,
+    "notification_position": "top-right",
+    "animation_speed": 1.0
+  },
+  "theme": {
+    "mode": "light",
+    "source": "builtin"
+  },
+  "bar": {
+    "position": "top",
+    "thickness": 80,
+    "background_opacity": 0.5,
+    "radius": 60,
+    "shadow": true,
+    "blur": true,
+    "margin_top": 0,
+    "margin_side": 120,
+    "show_date": true,
+    "auto_hide": true,
+    "exclusive_zone": 0
+  },
+  "modules": {
+    "dashboard_enabled": true,
+    "lockscreen_enabled": true,
+    "clipboard_enabled": true,
+    "show_battery_percentage": false,
+    "show_volume_percentage": false,
+    "enable_overdrive": false,
+    "desktop_widgets_enabled": false,
+    "dock_enabled": false
+  },
+  "weather": {
+    "enabled": false,
+    "unit": "celsius",
+    "location": "Kothri kalan"
+  },
+  "wallpaper": {
+    "enabled": true,
+    "wallpaper_dir": "~/Pictures/Wallpapers",
+    "current_wallpaper": "/home/zoro/Pictures/Wallpapers/Wallhaven/wallhaven_5ymol3.jpg",
+    "fill_mode": "crop",
+    "transition": "zoom"
+  },
+  "lockscreen": {
+    "blurred_desktop": true,
+    "blur_intensity": 0.5
+  },
+  "shortcuts": {
+    "terminal": "footclient",
+    "browser": "zen-browser",
+    "file_manager": "thunar",
+    "editor": "code"
+  },
+  "plugins": {
+    "enabled": true,
+    "poll_interval_secs": 5
+  }
+}

@@ -1,0 +1,11 @@
+[user]
+	email = mrsinghashvin@gmail.com
+	name = ashvin-to
+[url "https://aur.archlinux.org/"]
+	insteadOf = aur@aur.archlinux.org:
+[http]
+	sslCAinfo = /etc/ssl/certs/ca-certificates.crt
+	version = HTTP/1.1
+	postBuffer = 524288000
+[credential]
+	helper = store

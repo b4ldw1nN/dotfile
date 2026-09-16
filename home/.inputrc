@@ -1,0 +1,14 @@
+# Fix bracketed paste — stops ^[[200~ on paste
+set enable-bracketed-paste on
+set colored-stats on
+set completion-ignore-case on
+set show-all-if-ambiguous on
+set mark-symlinked-directories on
+
+# Use Ctrl+Shift+V / Ctrl+V for paste (foot now handles both) — keep quoted-insert on Ctrl+Q only
+# Unbind Ctrl+V from quoted-insert so it doesn't interfere if terminal doesn't intercept
+"\C-v": ""
+
+$if Bash
+  set bell-style none
+$endif

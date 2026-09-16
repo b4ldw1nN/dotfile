@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Example hyprshell plugin: shows the time, sends a notification on click.
+
+case "$1" in
+  click)
+    notify-send "Example plugin" "Clicked at $(date +%T)"
+    ;;
+  *)
+    printf '{"icon": "%s", "text": "%s", "tooltip": "Example hyprshell plugin"}\n' \
+      "$(printf '\UF0095')" "$(date +%H:%M)"
+    ;;
+esac

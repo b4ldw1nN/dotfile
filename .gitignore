@@ -1,0 +1,15 @@
+# Neovim undo history
+home/.config/nvim/undodir/
+
+# Secrets / credentials
+**/.env
+**/.env.*
+!**/.env.example
+**/*secret*
+**/*credentials*
+
+# OS/editor junk
+.DS_Store
+*.swp
+*.swo
+*~

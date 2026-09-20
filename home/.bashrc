@@ -206,29 +206,18 @@ alias lt='eza -T --icons --level=2'
 alias cd='z'
 
 # Package managers (fish)
-alias pii='yay -S'
-alias pi='yay -Rns'
+alias pii='paru -S'
+alias pi='paru -Rns'
 alias suii='sudo pacman -Syu'
 alias sui='sudo pacman -S'
 alias ded='sudo pacman -Rns'
-# w.fish extras
-alias pamcan='pacman'
-alias pac='pacman'
-
-# Vault
-alias lock='fusermount -u ~/unvault'
-alias unlock='gocryptfs ~/vault ~/unvault'
 
 # gdrive on-demand (was autostart 109M)
 alias gdrive-on='systemctl --user start gdrive-pool.service'
 alias gdrive-off='systemctl --user stop gdrive-pool.service'
 alias gdrive-status='systemctl --user status gdrive-pool.service'
 
-# pi helper
-alias pia="/home/zoro/.npm-global/bin/pi"
-
 alias fast='fastfetch -c $HOME/.config/fastfetch/config-compact.jsonc'
-alias icat='kitty icat'
 alias doc='cd ~/Documents/'
 alias dow='cd ~/Downloads/'
 alias pic='cd ~/Pictures/'
@@ -238,12 +227,6 @@ alias cpuinfo='lscpu'
 alias ports='sudo netstat -tulanp'
 alias df='df -h'
 alias du='du -h'
-alias gs='git status'
-alias ga='git add'
-alias gc='git commit'
-alias gp='git push'
-alias gl='git log --oneline --graph --decorate'
-alias gd='git diff'
 
 # --- Functions (from fish) ---
 
@@ -416,3 +399,6 @@ fi
 # --- Cleanup helpers ---
 unset -f _add_path _prepend_path 2>/dev/null
 
+
+# local secrets (not in repo)
+[ -f ~/.bashrc.secrets ] && . ~/.bashrc.secrets

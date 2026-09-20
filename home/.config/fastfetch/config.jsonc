@@ -3,7 +3,7 @@
     "logo": {
         "source": "/home/zoro/.config/fastfetch/l.txt",
         "color": {
-            "1": "#718285"
+            "1": "#878787"
         },
         "padding": {
             "top": 1,
@@ -14,7 +14,7 @@
     "display": {
         "separator": " 󰁔  ",
         "color": {
-            "keys": "#B0A69A"
+            "keys": "#63A499"
         }
     },
     "modules": [
@@ -22,9 +22,9 @@
         {
             "type": "title",
             "color": {
-                "user": "#B0A69A",
+                "user": "#63A499",
                 "at": "white",
-                "host": "#B0A69A"
+                "host": "#63A499"
             }
         },
         "break",

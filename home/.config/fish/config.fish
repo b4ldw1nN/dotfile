@@ -174,3 +174,6 @@ export PATH="$PATH:/home/zoro/.local/bin"
 
 
 set -x CLIPBOARD_SERVER_HOST (tailscale ip -4 2>/dev/null | head -n1)
+
+# local secrets (not in repo)
+test -f ~/.config/fish/secrets.fish; and source ~/.config/fish/secrets.fish

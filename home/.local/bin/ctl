@@ -1,0 +1,231 @@
+#!/bin/bash
+# ctl — master system control script
+# Usage: ctl <command> [args]
+
+# ─────────────────────────────────────────────
+# Helpers
+# ─────────────────────────────────────────────
+bold()   { echo -e "\e[1m$*\e[0m"; }
+green()  { echo -e "\e[32m$*\e[0m"; }
+yellow() { echo -e "\e[33m$*\e[0m"; }
+red()    { echo -e "\e[31m$*\e[0m"; }
+header() { echo -e "\n\e[1;34m── $* ──\e[0m"; }
+
+# ─────────────────────────────────────────────
+# status — DNS / WARP / Tailscale at a glance
+# ─────────────────────────────────────────────
+cmd_status() {
+    header "Network"
+
+    if [ -f /tmp/.nextdns_active ]; then
+        green "  DNS   ✅ NextDNS (DoT)"
+    else
+        yellow "  DNS   ⚡ Default (college/DHCP)"
+    fi
+
+    local warp_status
+    warp_status=$(warp-cli status 2>/dev/null | grep -i "status" | awk -F': ' '{print $2}')
+    if [[ "$warp_status" == *"Connected"* ]]; then
+        local warp_mode
+        warp_mode=$(warp-cli mode 2>/dev/null | head -1)
+        green "  WARP  ✅ Connected ($warp_mode)"
+    else
+        yellow "  WARP  ❌ Disconnected"
+    fi
+
+    if command -v tailscale &>/dev/null; then
+        local ts_ip
+        ts_ip=$(tailscale ip -4 2>/dev/null)
+        if [[ -n "$ts_ip" ]]; then
+            green "  TS    ✅ $ts_ip"
+        else
+            yellow "  TS    ❌ Not connected"
+        fi
+    fi
+
+    header "Active DNS"
+    local iface
+    iface=$(resolvectl status | awk '/Link [0-9]+ \(/{match($0, /\(([^)]+)\)/, arr); iface=arr[1]} /Default Route: yes/{print iface}' | head -n1)
+    resolvectl status "$iface" 2>/dev/null | grep -E "Current DNS|DNS Servers|DNSOverTLS" | sed 's/^/  /'
+    echo ""
+}
+
+# ─────────────────────────────────────────────
+# update — full system update
+# ─────────────────────────────────────────────
+cmd_update() {
+    header "System packages (paru)"
+    paru -Syu
+
+    if command -v bun &>/dev/null; then
+        header "Bun"
+        bun upgrade
+    fi
+
+    if command -v cargo &>/dev/null; then
+        header "Cargo packages"
+        cargo install-update -a 2>/dev/null || yellow "  (cargo-update not installed — skipping)"
+    fi
+
+    if command -v pnpm &>/dev/null; then
+        header "pnpm global"
+        pnpm update -g 2>/dev/null || true
+    fi
+
+    if command -v tldr &>/dev/null; then
+        header "tldr cache"
+        tldr --update 2>/dev/null || true
+    fi
+
+    green "\n✅ Everything updated."
+}
+
+# ─────────────────────────────────────────────
+# gh — GitHub account switcher (fzf)
+# ─────────────────────────────────────────────
+cmd_gh() {
+    local accounts=(
+        "ashvin-to  | mrsinghashvin@gmail.com  | git@github.com:"
+        "b4ldw1nN   | dreadful.locus@gmail.com | git@gh-b4ldw1nN:"
+    )
+
+    local choice
+    choice=$(printf '%s\n' "${accounts[@]}" | \
+        fzf --prompt="👤 Switch GitHub account: " \
+            --height 30% \
+            --layout reverse \
+            --border)
+    [ -z "$choice" ] && return 0
+
+    local name email ssh_host
+    name=$(echo "$choice"     | awk -F'|' '{gsub(/ /,"",$1); print $1}')
+    email=$(echo "$choice"    | awk -F'|' '{gsub(/ /,"",$2); print $2}')
+    ssh_host=$(echo "$choice" | awk -F'|' '{gsub(/ /,"",$3); print $3}')
+
+    git config user.name  "$name"
+    git config user.email "$email"
+
+    local remote
+    remote=$(git remote get-url origin 2>/dev/null)
+    if [ -n "$remote" ]; then
+        remote=$(echo "$remote" | sed \
+            -e 's|git@github.com:|PLACEHOLDER:|g' \
+            -e 's|git@gh-b4ldw1nN:|PLACEHOLDER:|g' \
+            -e "s|PLACEHOLDER:|${ssh_host}|g")
+        git remote set-url origin "$remote"
+        echo "  Remote → $remote"
+    fi
+
+    green "✅ Switched to $name ($email)"
+}
+
+# ─────────────────────────────────────────────
+# gdrive — toggle Google Drive rclone mount
+# ─────────────────────────────────────────────
+cmd_gdrive() {
+    local service="gdrive-pool.service"
+    local mount="$HOME/GoogleDrivePool"
+
+    if systemctl --user is-active --quiet "$service"; then
+        echo "🔄 Stopping Google Drive..."
+        systemctl --user stop "$service"
+        green "✅ Google Drive unmounted."
+    else
+        echo "🔄 Starting Google Drive..."
+        systemctl --user start "$service"
+        sleep 2
+        if systemctl --user is-active --quiet "$service"; then
+            green "✅ Google Drive mounted at $mount"
+            df -h "$mount" 2>/dev/null | tail -1 | awk '{print "   Used: "$3" / "$2" ("$5" full)"}'
+        else
+            red "❌ Failed to start. Check: systemctl --user status $service"
+        fi
+    fi
+}
+
+# ─────────────────────────────────────────────
+# dotfiles — commit + push ~/dotfiles
+# ─────────────────────────────────────────────
+DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
+
+cmd_dotfiles() {
+    if [ ! -d "$DOTFILES_DIR/.git" ]; then
+        red "❌ No git repo found at $DOTFILES_DIR"
+        echo "   Set DOTFILES_DIR env var to override."
+        return 1
+    fi
+
+    echo "📁 $DOTFILES_DIR"
+    echo ""
+
+    # Show what changed
+    local changes
+    changes=$(git -C "$DOTFILES_DIR" status --short)
+    if [ -z "$changes" ]; then
+        yellow "  Nothing to commit — dotfiles are up to date."
+        return 0
+    fi
+    echo "$changes" | sed 's/^/  /'
+    echo ""
+
+    # Commit message — use arg or auto timestamp
+    local msg="${*:-update: $(date '+%Y-%m-%d %H:%M')}"
+
+    git -C "$DOTFILES_DIR" add -A
+    git -C "$DOTFILES_DIR" commit -m "$msg"
+    git -C "$DOTFILES_DIR" push
+
+    green "\n✅ Dotfiles pushed."
+}
+
+# ─────────────────────────────────────────────
+# kill — fzf process killer
+# ─────────────────────────────────────────────
+cmd_kill() {
+    local entry pid name
+    entry=$(ps -ef | sed 1d | \
+        fzf --prompt="💀 Kill process: " \
+            --height 50% \
+            --layout reverse \
+            --preview 'echo {}' \
+            --preview-window down:3:wrap)
+    [ -z "$entry" ] && return 0
+
+    pid=$(echo "$entry" | awk '{print $2}')
+    name=$(echo "$entry" | awk '{print $8}')
+
+    echo "Killing $name (PID $pid)"
+    kill -9 "$pid" && green "✅ Killed." || red "❌ Failed."
+}
+
+# ─────────────────────────────────────────────
+cmd_help() {
+    bold "\nctl — system control"
+    echo ""
+    echo "  $(bold status)           DNS / WARP / Tailscale at a glance"
+    echo "  $(bold update)           Full system update (paru + bun + cargo + pnpm)"
+    echo "  $(bold gh)               Switch GitHub account (fzf picker)"
+    echo "  $(bold gdrive)           Toggle Google Drive rclone mount"
+    echo "  $(bold dotfiles) [msg]   Commit + push dotfiles (~/dotfiles)"
+    echo "  $(bold kill)             fzf process killer"
+    echo "  $(bold help)             Show this help"
+    echo ""
+}
+
+# ─────────────────────────────────────────────
+# Dispatch
+# ─────────────────────────────────────────────
+case "${1:-help}" in
+    status)   cmd_status             ;;
+    update)   cmd_update             ;;
+    gh)       cmd_gh                 ;;
+    gdrive)   cmd_gdrive             ;;
+    dotfiles) cmd_dotfiles "${@:2}"  ;;
+    kill)     cmd_kill               ;;
+    help|--help|-h) cmd_help         ;;
+    *)
+        red "Unknown command: $1"
+        cmd_help
+        exit 1
+        ;;
+esac

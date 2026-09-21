@@ -1,0 +1,197 @@
+#!/usr/bin/env bash
+
+set -u
+
+CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/nextdns/env"
+STUB_RESOLV="/run/systemd/resolve/stub-resolv.conf"
+
+# ------------------------------------------------------------
+# Load local configuration
+# ------------------------------------------------------------
+
+if [[ ! -f "$CONFIG_FILE" ]]; then
+    echo "❌ Configuration file not found:"
+    echo "   $CONFIG_FILE"
+    echo
+    echo "Create it with:"
+    echo "   NEXTDNS_PROFILE=\"your-profile-id\""
+    exit 1
+fi
+
+# shellcheck disable=SC1090
+source "$CONFIG_FILE"
+
+if [[ -z "${NEXTDNS_PROFILE:-}" ]]; then
+    echo "❌ NEXTDNS_PROFILE is not configured."
+    exit 1
+fi
+
+# ------------------------------------------------------------
+# Detect active network interface
+# ------------------------------------------------------------
+
+get_active_interface() {
+    local iface
+
+    iface=$(
+        resolvectl status |
+            awk '
+                /Link [0-9]+ \(/ {
+                    match($0, /\(([^)]+)\)/, arr)
+                    iface=arr[1]
+                }
+
+                /Default Route: yes/ {
+                    print iface
+                }
+            ' |
+            head -n1
+    )
+
+    # Fallback to the interface owning the default route.
+    if [[ -z "$iface" ]]; then
+        iface=$(ip route show default | awk '{print $5}' | head -n1)
+    fi
+
+    echo "$iface"
+}
+
+IFACE="$(get_active_interface)"
+
+if [[ -z "$IFACE" ]]; then
+    echo "❌ Could not determine the active network interface."
+    exit 1
+fi
+
+echo "🌐 Active interface: $IFACE"
+
+# ------------------------------------------------------------
+# Ensure systemd-resolved stub mode
+# ------------------------------------------------------------
+
+force_stub_mode() {
+    local current
+
+    current="$(readlink /etc/resolv.conf 2>/dev/null || true)"
+
+    if [[ "$current" != "$STUB_RESOLV" ]]; then
+        echo "🔧 Restoring systemd-resolved stub mode..."
+        sudo ln -sf "$STUB_RESOLV" /etc/resolv.conf
+    fi
+}
+
+# ------------------------------------------------------------
+# Tailscale DNS control
+#
+# IMPORTANT:
+# We intentionally use `tailscale set` instead of `tailscale up`.
+#
+# `tailscale up` can reapply/reconfigure unrelated settings.
+# `tailscale set` changes only the requested preference.
+# ------------------------------------------------------------
+
+set_tailscale_dns() {
+    local accept_dns="$1"
+
+    if ! command -v tailscale >/dev/null 2>&1; then
+        echo "⚠️  Tailscale is not installed."
+        return 0
+    fi
+
+    echo "📡 Setting Tailscale accept-dns=$accept_dns..."
+
+    sudo tailscale set --accept-dns="$accept_dns"
+}
+
+# ------------------------------------------------------------
+# Detect whether the interface is currently using NextDNS
+# ------------------------------------------------------------
+
+nextdns_is_active() {
+    resolvectl status "$IFACE" 2>/dev/null |
+        grep -q "45.90.28.0#${NEXTDNS_PROFILE}\.dns\.nextdns\.io"
+}
+
+# ------------------------------------------------------------
+# Enable NextDNS
+# ------------------------------------------------------------
+
+enable_nextdns() {
+    echo
+    echo "🔄 Enabling NextDNS on $IFACE..."
+
+    # Tailscale must not install its DNS configuration.
+    set_tailscale_dns false
+
+    # Make sure systemd-resolved owns /etc/resolv.conf.
+    force_stub_mode
+
+    echo "🔐 Configuring NextDNS DoT..."
+
+    sudo resolvectl dns "$IFACE" \
+        "45.90.28.0#${NEXTDNS_PROFILE}.dns.nextdns.io" \
+        "45.90.30.0#${NEXTDNS_PROFILE}.dns.nextdns.io" \
+        "2a07:a8c0::#${NEXTDNS_PROFILE}.dns.nextdns.io" \
+        "2a07:a8c1::#${NEXTDNS_PROFILE}.dns.nextdns.io"
+
+    sudo resolvectl dnsovertls "$IFACE" yes
+
+    # Route all DNS queries through NextDNS on this interface.
+    sudo resolvectl domain "$IFACE" "~."
+
+    echo
+    echo "✅ NextDNS enabled."
+}
+
+# ------------------------------------------------------------
+# Disable NextDNS
+# ------------------------------------------------------------
+
+disable_nextdns() {
+    echo
+    echo "🔄 Disabling NextDNS on $IFACE..."
+
+    # Remove the manually configured per-link DNS settings.
+    sudo resolvectl revert "$IFACE"
+
+    # Let NetworkManager restore DHCP/network DNS.
+    sudo nmcli device reapply "$IFACE" 2>/dev/null || true
+
+    # Restore Tailscale DNS handling.
+    set_tailscale_dns true
+
+    # Tailscale may modify /etc/resolv.conf.
+    force_stub_mode
+
+    echo
+    echo "✅ NextDNS disabled."
+}
+
+# ------------------------------------------------------------
+# Show current DNS state
+# ------------------------------------------------------------
+show_status() {
+    echo
+    echo "=== Current DNS ==="
+    echo
+
+    resolvectl status "$IFACE" |
+        grep -E \
+            "Current DNS Server|DNS Servers|DNS Domain|DNSOverTLS|Default Route" \
+            || true
+
+    echo
+}
+
+# ------------------------------------------------------------
+# Main
+# ------------------------------------------------------------
+
+if nextdns_is_active; then
+    disable_nextdns
+else
+    enable_nextdns
+fi
+
+show_status
+

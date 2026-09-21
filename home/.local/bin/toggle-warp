@@ -1,0 +1,59 @@
+#!/bin/bash
+
+# Usage:
+#   ./toggle-warp.sh          — toggle full tunnel (all traffic through WARP)
+#   ./toggle-warp.sh proxy    — toggle SOCKS5 proxy mode (localhost:40000)
+
+MODE="${1:-tunnel}"
+STATE_FILE="/tmp/.warp_active"
+
+# Ensure the warp-svc daemon is running
+ensure_service() {
+    if ! systemctl is-active --quiet warp-svc; then
+        echo "🔧 Starting warp-svc..."
+        sudo systemctl start warp-svc
+        sleep 1
+    fi
+}
+
+enable_warp() {
+    ensure_service
+
+    if [ "$MODE" = "proxy" ]; then
+        echo "🔄 Enabling WARP in proxy mode (SOCKS5 on localhost:40000)..."
+        warp-cli mode proxy
+        warp-cli connect
+        echo "proxy" > "$STATE_FILE"
+        echo "✅ WARP proxy enabled."
+        echo ""
+        echo "   SOCKS5 proxy: 127.0.0.1:40000"
+        echo "   → Use FoxyProxy (Firefox) or SwitchyOmega (Chrome)"
+        echo "     to route specific sites (reddit.com etc.) through it."
+    else
+        echo "🔄 Enabling WARP full tunnel (all traffic)..."
+        warp-cli mode warp
+        warp-cli connect
+        echo "tunnel" > "$STATE_FILE"
+        echo "✅ WARP tunnel enabled. All traffic goes through Cloudflare."
+    fi
+}
+
+disable_warp() {
+    ensure_service
+    echo "🔄 Disconnecting WARP..."
+    warp-cli disconnect
+    rm -f "$STATE_FILE"
+    echo "✅ WARP disconnected."
+}
+
+# Toggle
+if [ -f "$STATE_FILE" ]; then
+    disable_warp
+else
+    enable_warp
+fi
+
+# Status
+echo ""
+echo "=== WARP Status ==="
+warp-cli status

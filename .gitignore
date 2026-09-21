@@ -13,3 +13,6 @@ home/.config/nvim/undodir/
 *.swp
 *.swo
 *~
+
+# Local NextDNS configuration
+home/.config/nextdns/env

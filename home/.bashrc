@@ -59,7 +59,6 @@ _add_path "$BUN_INSTALL/bin"
 _add_path "$PNPM_HOME"
 _add_path "$HOME/.npm-global/bin"
 _add_path "$HOME/.kimi-code/bin"
-_add_path "$HOME/.spicetify"
 _add_path "$HOME/.lmstudio/bin"
 _add_path "/opt/brew/bin"
 _add_path "/opt/cuda/bin"
@@ -212,10 +211,6 @@ alias suii='sudo pacman -Syu'
 alias sui='sudo pacman -S'
 alias ded='sudo pacman -Rns'
 
-# gdrive on-demand (was autostart 109M)
-alias gdrive-on='systemctl --user start gdrive-pool.service'
-alias gdrive-off='systemctl --user stop gdrive-pool.service'
-alias gdrive-status='systemctl --user status gdrive-pool.service'
 
 alias fast='fastfetch -c $HOME/.config/fastfetch/config-compact.jsonc'
 alias doc='cd ~/Documents/'
@@ -227,53 +222,14 @@ alias cpuinfo='lscpu'
 alias ports='sudo netstat -tulanp'
 alias df='df -h'
 alias du='du -h'
-alias warp="$HOME/.local/bin/toggle-warp"
-alias dns="$HOME/.local/bin/toggle-dns"
+alias warp="$HOME/scripts/toggle-warp.sh"
+alias dns="$HOME/scripts/toggle-dns.sh"
+alias ctl="$HOME/scripts/ctl"
 
 # --- Functions (from fish) ---
 
 # ============================================================
-# GitHub Account Switchers
-# ============================================================
-
-baldwin() {
-    git config user.name "b4ldw1nN"
-    git config user.email "dreadful.locus@gmail.com"
-
-    local remote
-    remote="$(git remote get-url origin 2>/dev/null)"
-
-    if [ -n "$remote" ]; then
-        remote="$(echo "$remote" | sed \
-            's|git@github.com:|git@gh-b4ldw1nN:|g')"
-
-        git remote set-url origin "$remote"
-    fi
-
-    echo "Switched current repo to b4ldw1nN"
-}
-
-
-ashvinto() {
-    git config user.name "ashvin-to"
-    git config user.email "mrsinghashvin@gmail.com"
-
-    local remote
-    remote="$(git remote get-url origin 2>/dev/null)"
-
-    if [ -n "$remote" ]; then
-        remote="$(echo "$remote" | sed \
-            's|git@gh-b4ldw1nN:|git@github.com:|g')"
-
-        git remote set-url origin "$remote"
-    fi
-
-    echo "Switched current repo to ashvin-to"
-}
-
-
-# ============================================================
-# Clone using b4ldw1nN
+# Clone using b4ldw1nN  (use: ctl gh — to switch accounts)
 # ============================================================
 
 clone-baldwin() {
@@ -308,57 +264,6 @@ command_not_found_handle() {
     echo -e "\e[31mOops, you entered the wrong command!\e[0m"
     echo "bash: Unknown command: $1" >&2
     return 127
-}
-
-cdf() {
-  local dir
-  dir=$(fd --type d --hidden --exclude .git . ~ 2>/dev/null | \
-    fzf --prompt="📁 Select directory: " \
-        --height 50% \
-        --preview 'eza --tree --level=2 --icons --color=always {}' 2>/dev/null)
-  if [[ -n "$dir" ]]; then
-    cd "$dir" || return
-    ls
-  fi
-}
-
-vf() {
-  local file
-  file=$(fd --type f --hidden --exclude .git 2>/dev/null | \
-    fzf --prompt="✏️  Select file to edit: " \
-        --height 50% \
-        --preview 'bat --color=always --style=numbers --line-range :500 {}' 2>/dev/null)
-  if [[ -n "$file" ]]; then
-    ${EDITOR:-nvim} "$file"
-  fi
-}
-
-fh() {
-  local cmd
-  cmd=$(history | \
-    fzf --prompt="🔍 Search history: " \
-        --tac \
-        --height 50% \
-        --preview 'echo {}' \
-        --preview-window up:3:wrap 2>/dev/null | \
-    sed 's/ *[0-9]* *//')
-  if [[ -n "$cmd" ]]; then
-    eval "$cmd"
-  fi
-}
-
-fkill() {
-  local pid
-  pid=$(ps -ef | sed 1d | \
-    fzf --prompt="💀 Select process to kill: " \
-        --height 50% \
-        --preview 'echo {}' \
-        --preview-window down:3:wrap 2>/dev/null | \
-    awk '{print $2}')
-  if [[ -n "$pid" ]]; then
-    echo "Killing process $pid"
-    kill -9 "$pid"
-  fi
 }
 
 mkcd() {

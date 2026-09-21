@@ -3,15 +3,15 @@ theme=KvGnomeDark
 # The theme is based on Gnome but we will override colors below
 
 [Palette]
-Window=#1E1E1E
-WindowText=#ACACAC
-Base=#4C4C4C
-AlternateBase=#5A5A5A
-Button=#484848
-ButtonText=#ACACAC
-Highlight=#878787
-HighlightedText=#1E1E1E
-Link=#63A499
-LinkVisited=#BD8073
-TooltipBase=#4C4C4C
-TooltipText=#ACACAC
+Window=#232939
+WindowText=#B1B2B9
+Base=#2E2F33
+AlternateBase=#5E6067
+Button=#525664
+ButtonText=#B1B2B9
+Highlight=#8292B2
+HighlightedText=#232939
+Link=#7B91C2
+LinkVisited=#8891A2
+TooltipBase=#2E2F33
+TooltipText=#B1B2B9

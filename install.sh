@@ -8,14 +8,17 @@ BACKUP_EXT=".dotfiles-bak"
 
 link() {  # link <source> <target>
   local src="$1" dst="$2"
+
   if [[ -L "$dst" && "$(readlink "$dst")" == "$src" ]]; then
     echo "ok      $dst"
     return
   fi
+
   if [[ -e "$dst" && ! -L "$dst" ]]; then
     mv "$dst" "$dst$BACKUP_EXT"
     echo "backup  $dst -> $dst$BACKUP_EXT"
   fi
+
   rm -rf "$dst"
   ln -s "$src" "$dst"
   echo "link    $dst -> $src"
@@ -39,16 +42,39 @@ for f in gtkrc gtkrc-2.0 mimeapps.list starship.toml user-dirs.dirs user-dirs.lo
   link "$DOTFILES/.config/$f" "$HOME/.config/$f"
 done
 
+echo "== ~/.config/nextdns =="
+mkdir -p "$HOME/.config/nextdns"
+
+if [[ ! -f "$HOME/.config/nextdns/env" ]]; then
+  cp "$DOTFILES/.config/nextdns/env.example" \
+     "$HOME/.config/nextdns/env"
+  chmod 600 "$HOME/.config/nextdns/env"
+  echo "created  $HOME/.config/nextdns/env"
+else
+  echo "ok      $HOME/.config/nextdns/env"
+fi
+
+echo "== ~/.local/bin =="
+mkdir -p "$HOME/.local/bin"
+
+for f in toggle-dns toggle-warp; do
+  link "$DOTFILES/.local/bin/$f" "$HOME/.local/bin/$f"
+done
+
 echo "== fish (symlinks inside a real dir so secrets stay local) =="
 mkdir -p "$HOME/.config/fish"
+
 for item in config.fish w.fish functions completions conf.d; do
   link "$DOTFILES/.config/fish/$item" "$HOME/.config/fish/$item"
 done
 
 echo
 echo "== Secrets (NOT in repo — create these manually) =="
-[[ -f "$HOME/.bashrc.secrets" ]]        || echo "missing  ~/.bashrc.secrets"
-[[ -f "$HOME/.config/fish/secrets.fish" ]] || echo "missing  ~/.config/fish/secrets.fish"
+[[ -f "$HOME/.bashrc.secrets" ]] || \
+  echo "missing  ~/.bashrc.secrets"
+
+[[ -f "$HOME/.config/fish/secrets.fish" ]] || \
+  echo "missing  ~/.config/fish/secrets.fish"
 
 echo
 echo "Done."

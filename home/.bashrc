@@ -227,7 +227,7 @@ alias cpuinfo='lscpu'
 alias ports='sudo netstat -tulanp'
 alias df='df -h'
 alias du='du -h'
-alias warp="$HOME/.config/hypr/scripts/toggle-warp.sh"
+alias warp="$HOME/.local/bin/toggle-warp"
 alias dns="$HOME/.local/bin/toggle-dns"
 
 # --- Functions (from fish) ---

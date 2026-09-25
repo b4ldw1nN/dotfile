@@ -157,36 +157,57 @@ cmd_dotfiles() {
 
     local msg="${*:-update: $(date '+%Y-%m-%d %H:%M')}"
 
-    # 1. Process Submodules (hypr, hyprshell)
-    local submodules=("home/.config/hypr" "hyprshell")
-    for sub in "${submodules[@]}"; do
-        local sub_path="$DOTFILES_DIR/$sub"
-        if [ -d "$sub_path/.git" ] || [ -f "$sub_path/.git" ]; then
-            header "Submodule: $sub"
-            
-            # Ensure submodule is on master branch
-            git -C "$sub_path" checkout master 2>/dev/null || true
-            git -C "$sub_path" pull --rebase origin master 2>/dev/null || true
+    # Submodule targets: (standalone_dir_in_home:dotfiles_submodule_path)
+    local targets=(
+        "$HOME/.config/hypr:home/.config/hypr"
+        "$HOME/hyprshell:home/hyprshell"
+    )
 
+    for entry in "${targets[@]}"; do
+        local home_path="${entry%%:*}"
+        local sub_rel="${entry#*:}"
+        local dot_sub_path="$DOTFILES_DIR/$sub_rel"
+
+        header "Processing: $sub_rel"
+
+        # Step A: Commit & push standalone working dir in ~ if it exists and has changes
+        if [ -d "$home_path/.git" ] || [ -f "$home_path/.git" ]; then
+            git -C "$home_path" checkout master 2>/dev/null || true
+            git -C "$home_path" pull --rebase origin master 2>/dev/null || true
+            local home_changes
+            home_changes=$(git -C "$home_path" status --short 2>/dev/null)
+            if [ -n "$home_changes" ]; then
+                echo "  Changes in $home_path:"
+                echo "$home_changes" | sed 's/^/    /'
+                git -C "$home_path" add -A
+                git -C "$home_path" commit -m "$msg"
+                git -C "$home_path" push origin master
+                green "  ✅ Pushed changes from $home_path to origin/master."
+            fi
+        fi
+
+        # Step B: Sync and commit inside dotfiles submodule path
+        if [ -d "$dot_sub_path/.git" ] || [ -f "$dot_sub_path/.git" ]; then
+            git -C "$dot_sub_path" checkout master 2>/dev/null || true
+            git -C "$dot_sub_path" pull --rebase origin master 2>/dev/null || true
             local sub_changes
-            sub_changes=$(git -C "$sub_path" status --short 2>/dev/null)
+            sub_changes=$(git -C "$dot_sub_path" status --short 2>/dev/null)
             if [ -n "$sub_changes" ]; then
-                echo "$sub_changes" | sed 's/^/  /'
-                git -C "$sub_path" add -A
-                git -C "$sub_path" commit -m "$msg"
-                git -C "$sub_path" push origin master
-                green "  ✅ Submodule $sub committed and pushed."
-            else
-                yellow "  Nothing to commit in $sub."
+                echo "  Changes in $dot_sub_path:"
+                echo "$sub_changes" | sed 's/^/    /'
+                git -C "$dot_sub_path" add -A
+                git -C "$dot_sub_path" commit -m "$msg"
+                git -C "$dot_sub_path" push origin master
+                green "  ✅ Pushed changes from $dot_sub_path to origin/master."
             fi
 
-            # Stage updated submodule pointer in root dotfiles repo
-            git -C "$DOTFILES_DIR" add "$sub"
+            # Stage updated submodule commit pointer in root dotfiles repo
+            git -C "$DOTFILES_DIR" add "$sub_rel"
         fi
     done
 
     # 2. Sync Submodule URLs in Root Dotfiles
-    header "Syncing submodules"
+    header "Syncing submodule URLs"
     git -C "$DOTFILES_DIR" submodule sync --recursive
     green "  ✅ Submodules synced."
 

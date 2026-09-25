@@ -1,6 +1,6 @@
 [submodule "hyprshell"]
 	path = hyprshell
-	url = git@gh-b4ldw1nN:b4ldw1nN/hyprshell.git
+	url = https://github.com/b4ldw1nN/hyprshell.git
 [submodule "home/.config/hypr"]
 	path = home/.config/hypr
-	url = git@gh-b4ldw1nN:b4ldw1nN/hypr.git
+	url = https://github.com/b4ldw1nN/hypr.git

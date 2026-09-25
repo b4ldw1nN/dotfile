@@ -3,9 +3,14 @@
 	name = ashvin-to
 [url "https://aur.archlinux.org/"]
 	insteadOf = aur@aur.archlinux.org:
+[url "git@gh-b4ldw1nN:b4ldw1nN/"]
+	insteadOf = https://github.com/b4ldw1nN/
+	insteadOf = git@github.com:b4ldw1nN/
 [http]
 	sslCAinfo = /etc/ssl/certs/ca-certificates.crt
 	version = HTTP/1.1
 	postBuffer = 524288000
 [credential]
 	helper = store
+[submodule]
+	recurse = true

@@ -144,7 +144,7 @@ cmd_gdrive() {
 }
 
 # ─────────────────────────────────────────────
-# dotfiles — commit + push ~/dotfiles
+# dotfiles — commit + push submodules & ~/dotfiles
 # ─────────────────────────────────────────────
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
 
@@ -155,27 +155,50 @@ cmd_dotfiles() {
         return 1
     fi
 
-    echo "📁 $DOTFILES_DIR"
-    echo ""
+    local msg="${*:-update: $(date '+%Y-%m-%d %H:%M')}"
 
-    # Show what changed
+    # 1. Process Submodules (hypr, hyprshell)
+    local submodules=("home/.config/hypr" "hyprshell")
+    for sub in "${submodules[@]}"; do
+        local sub_path="$DOTFILES_DIR/$sub"
+        if [ -d "$sub_path/.git" ] || [ -f "$sub_path/.git" ]; then
+            header "Submodule: $sub"
+            local sub_changes
+            sub_changes=$(git -C "$sub_path" status --short 2>/dev/null)
+            if [ -n "$sub_changes" ]; then
+                echo "$sub_changes" | sed 's/^/  /'
+                git -C "$sub_path" add -A
+                git -C "$sub_path" commit -m "$msg"
+                git -C "$sub_path" push
+                green "  ✅ Submodule $sub committed and pushed."
+            else
+                yellow "  Nothing to commit in $sub."
+            fi
+        fi
+    done
+
+    # 2. Sync Submodules in Root Dotfiles
+    header "Syncing submodules"
+    git -C "$DOTFILES_DIR" submodule sync --recursive
+    git -C "$DOTFILES_DIR" submodule update --init --recursive
+    green "  ✅ Submodules synced."
+
+    # 3. Process Root Dotfiles
+    header "Dotfiles root ($DOTFILES_DIR)"
+    git -C "$DOTFILES_DIR" add -A
+
     local changes
     changes=$(git -C "$DOTFILES_DIR" status --short)
     if [ -z "$changes" ]; then
-        yellow "  Nothing to commit — dotfiles are up to date."
-        return 0
+        yellow "  Nothing to commit in dotfiles root."
+    else
+        echo "$changes" | sed 's/^/  /'
+        git -C "$DOTFILES_DIR" commit -m "$msg"
+        git -C "$DOTFILES_DIR" push
+        green "  ✅ Root dotfiles committed and pushed."
     fi
-    echo "$changes" | sed 's/^/  /'
-    echo ""
 
-    # Commit message — use arg or auto timestamp
-    local msg="${*:-update: $(date '+%Y-%m-%d %H:%M')}"
-
-    git -C "$DOTFILES_DIR" add -A
-    git -C "$DOTFILES_DIR" commit -m "$msg"
-    git -C "$DOTFILES_DIR" push
-
-    green "\n✅ Dotfiles pushed."
+    green "\n✅ All submodules (hypr, hyprshell) and dotfiles committed, synced, and pushed."
 }
 
 # ─────────────────────────────────────────────
@@ -206,7 +229,7 @@ cmd_help() {
     echo "  $(bold update)           Full system update (paru + bun + cargo + pnpm)"
     echo "  $(bold gh)               Switch GitHub account (fzf picker)"
     echo "  $(bold gdrive)           Toggle Google Drive rclone mount"
-    echo "  $(bold dotfiles) [msg]   Commit + push dotfiles (~/dotfiles)"
+    echo "  $(bold dotfiles) [msg]   Commit + push submodules (hypr, hyprshell) & dotfiles (~/dotfiles)"
     echo "  $(bold kill)             fzf process killer"
     echo "  $(bold help)             Show this help"
     echo ""

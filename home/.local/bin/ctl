@@ -201,7 +201,7 @@ cmd_dotfiles() {
     else
         echo "$changes" | sed 's/^/  /'
         git -C "$DOTFILES_DIR" commit -m "$msg"
-        git -C "$DOTFILES_DIR" push origin main
+        git -C "$DOTFILES_DIR" push --no-recurse-submodules origin main
         green "  ✅ Root dotfiles committed and pushed."
     fi
 

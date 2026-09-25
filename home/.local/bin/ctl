@@ -173,7 +173,6 @@ cmd_dotfiles() {
         # Step A: Commit & push standalone working dir in ~ if it exists and has changes
         if [ -d "$home_path/.git" ] || [ -f "$home_path/.git" ]; then
             git -C "$home_path" checkout master 2>/dev/null || true
-            git -C "$home_path" pull --rebase origin master 2>/dev/null || true
             local home_changes
             home_changes=$(git -C "$home_path" status --short 2>/dev/null)
             if [ -n "$home_changes" ]; then
@@ -181,8 +180,14 @@ cmd_dotfiles() {
                 echo "$home_changes" | sed 's/^/    /'
                 git -C "$home_path" add -A
                 git -C "$home_path" commit -m "$msg"
-                git -C "$home_path" push origin master
-                green "  ✅ Pushed changes from $home_path to origin/master."
+                git -C "$home_path" pull --rebase origin master 2>/dev/null || true
+                if git -C "$home_path" push origin master; then
+                    green "  ✅ Pushed changes from $home_path to origin/master."
+                else
+                    red "  ❌ Failed to push $home_path to origin/master."
+                fi
+            else
+                yellow "  No uncommitted changes in $home_path."
             fi
         fi
 
@@ -190,6 +195,7 @@ cmd_dotfiles() {
         if [ -d "$dot_sub_path/.git" ] || [ -f "$dot_sub_path/.git" ]; then
             git -C "$dot_sub_path" checkout master 2>/dev/null || true
             git -C "$dot_sub_path" pull --rebase origin master 2>/dev/null || true
+
             local sub_changes
             sub_changes=$(git -C "$dot_sub_path" status --short 2>/dev/null)
             if [ -n "$sub_changes" ]; then
@@ -197,7 +203,7 @@ cmd_dotfiles() {
                 echo "$sub_changes" | sed 's/^/    /'
                 git -C "$dot_sub_path" add -A
                 git -C "$dot_sub_path" commit -m "$msg"
-                git -C "$dot_sub_path" push origin master
+                git -C "$dot_sub_path" push origin master 2>/dev/null || true
                 green "  ✅ Pushed changes from $dot_sub_path to origin/master."
             fi
 
@@ -222,8 +228,11 @@ cmd_dotfiles() {
     else
         echo "$changes" | sed 's/^/  /'
         git -C "$DOTFILES_DIR" commit -m "$msg"
-        git -C "$DOTFILES_DIR" push --no-recurse-submodules origin main
-        green "  ✅ Root dotfiles committed and pushed."
+        if git -C "$DOTFILES_DIR" push --no-recurse-submodules origin main; then
+            green "  ✅ Root dotfiles committed and pushed."
+        else
+            red "  ❌ Failed to push dotfiles root."
+        fi
     fi
 
     green "\n✅ All submodules (hypr, hyprshell) and dotfiles committed, synced, and pushed."
